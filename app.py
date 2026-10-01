@@ -44,7 +44,7 @@ else:
         totale_peso = 0.0
         totale_prezzo = 0.0
 
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
 
         for index, file in enumerate(uploaded_files):
             col_img, col_data = st.columns([1, 1])
