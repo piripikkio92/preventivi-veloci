@@ -1,7 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
-import json
 
 # Configurazione della pagina
 st.set_page_config(page_title="Preventivatore Lamiere & Zanzariere", page_icon="📐", layout="wide")
@@ -29,7 +28,8 @@ else:
         totale_prezzo = 0.0
 
         for index, file in enumerate(uploaded_files):
-            st.image(file, caption=f"Foto {index+1}: {file.name}", use_column_width=True)
+            # Correggiamo il parametro per evitare l'errore
+            st.image(file, caption=f"Foto {index+1}: {file.name}", use_container_width=True)
 
         st.divider()
         st.subheader("📊 RIEPILOGO TOTALE PREVENTIVO")
