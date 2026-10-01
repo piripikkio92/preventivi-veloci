@@ -7,11 +7,11 @@ import re
 # Configurazione della pagina Streamlit
 st.set_page_config(page_title="Preventivatore Lamiere & Zanzariere", page_icon="📐", layout="wide")
 
-# Configurazione della chiave API di Google Gemini recuperata dai Secrets
+# Configurazione della chiave API di Google Gemini
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
-    st.error("⚠️ Chiave API Gemini non trovata nei Secrets di Streamlit! Inserisci GEMINI_API_KEY nei Secrets.")
+    st.error("⚠️ Chiave API Gemini non trovata nei Secrets di Streamlit!")
 
 # Database materiali di base (finitura, spessore, peso specifico kg/m2, prezzo €/kg)
 DATABASE_MATERIALI = {
@@ -25,7 +25,6 @@ DATABASE_MATERIALI = {
 st.title("🛠️ Preventivatore Officina")
 st.caption("Calcolo automatico sviluppo, peso e prezzo per lamiere piegate")
 
-# Menu laterale modulare
 modulo = st.sidebar.radio("Seleziona Modulo:", ["📐 Lamiere Piegate (da Foto)", "🦟 Zanzariere (In Arrivo)"])
 
 if modulo == "🦟 Zanzariere (In Arrivo)":
@@ -34,7 +33,6 @@ else:
     st.header("📸 Preventivo Lamiere Piegate da Foto")
     st.write("Carica una o più foto degli schizzi con le misure.")
 
-    # Upload immagini multiple
     uploaded_files = st.file_uploader("Carica le foto dei disegni (anche multiple)", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
 
     if uploaded_files:
@@ -44,7 +42,8 @@ else:
         totale_peso = 0.0
         totale_prezzo = 0.0
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # Modello aggiornato a gemini-3.8-flash
+        model = genai.GenerativeModel('gemini-3.8-flash')
 
         for index, file in enumerate(uploaded_files):
             col_img, col_data = st.columns([1, 1])
@@ -77,7 +76,6 @@ else:
                     response = model.generate_content([prompt, image])
                     text_response = response.text
                     
-                    # Estrazione e pulizia del blocco JSON
                     json_match = re.search(r'\[.*\]', text_response, re.DOTALL)
                     if json_match:
                         pezzi_letti = json.loads(json_match.group(0))
@@ -88,12 +86,10 @@ else:
                             qty = pezzo.get("quantita", 1)
                             colore = pezzo.get("colore", "RAL 8017").upper()
                             
-                            # Calcolo sviluppo (misure interne: somma pura)
                             sviluppo_mm = sum(lati)
                             sviluppo_m = sviluppo_mm / 1000.0
                             H_m = H / 1000.0
                             
-                            # Parametri materiale
                             mat_info = DATABASE_MATERIALI.get(colore, DATABASE_MATERIALI["RAL 8017"])
                             peso_spec = mat_info["peso_spec"]
                             prezzo_kg = mat_info["prezzo_kg"]
